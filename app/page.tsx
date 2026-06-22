@@ -4,11 +4,12 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
-// Configurable Launch Date: October 15, 2026, at 12:00 PM IST (GMT+5:30)
-const LAUNCH_DATE_STR = "2026-10-15T12:00:00+05:30";
+// Configurable Launch Date: July 20, 2026, at 12:00 AM IST (Asia/Kolkata)
+const LAUNCH_DATE = "2026-07-20T00:00:00+05:30";
 
 export default function ComingSoon() {
   const [isMounted, setIsMounted] = useState(false);
+  const [isExpired, setIsExpired] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -27,10 +28,13 @@ export default function ComingSoon() {
     setIsMounted(true);
     
     const calculateTimeLeft = () => {
-      const difference = +new Date(LAUNCH_DATE_STR) - +new Date();
+      const difference = +new Date(LAUNCH_DATE) - +new Date();
       let newTimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
 
-      if (difference > 0) {
+      if (difference <= 0) {
+        setIsExpired(true);
+      } else {
+        setIsExpired(false);
         newTimeLeft = {
           days: Math.floor(difference / (1000 * 60 * 60 * 24)),
           hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
@@ -98,7 +102,7 @@ export default function ComingSoon() {
       }
 
       setSuccessMsg(
-        "Welcome to the Founding Community. Your exclusive KASEDA launch coupon will be delivered directly to your WhatsApp when we officially launch."
+        "Welcome to the Founding Community. Your exclusive KASEDA launch coupon will be delivered to your WhatsApp before our official launch on 20 July 2026."
       );
       setFullName("");
       setWhatsappNumber("");
@@ -175,20 +179,34 @@ export default function ComingSoon() {
         </p>
 
         {/* CTA Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md mx-auto">
-          <button
-            onClick={() => scrollToSection("early-access")}
-            className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
-          >
-            Join The Founding Community
-          </button>
-          <button
-            onClick={() => scrollToSection("story")}
-            className="bg-black text-white uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-zinc-800 hover:border-white cursor-pointer select-none rounded-none"
-          >
-            Learn Our Story
-          </button>
-        </div>
+        {isExpired ? (
+          <div className="flex flex-col items-center gap-6">
+            <span className="text-zinc-350 font-serif italic text-xl tracking-widest block font-light">
+              KASEDA Has Officially Launched
+            </span>
+            <button
+              onClick={() => scrollToSection("collection-preview")}
+              className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
+            >
+              Explore The Collection
+            </button>
+          </div>
+        ) : (
+          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md mx-auto">
+            <button
+              onClick={() => scrollToSection("early-access")}
+              className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
+            >
+              Join The Founding Community
+            </button>
+            <button
+              onClick={() => scrollToSection("story")}
+              className="bg-black text-white uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-zinc-800 hover:border-white cursor-pointer select-none rounded-none"
+            >
+              Learn Our Story
+            </button>
+          </div>
+        )}
       </main>
 
       {/* Brand Story Section */}
@@ -215,45 +233,47 @@ export default function ComingSoon() {
       </section>
 
       {/* Countdown Timer Section */}
-      <section className="border-t border-zinc-900 bg-zinc-950 py-24 px-6 md:px-12 lg:px-24 relative z-10">
-        <div className="max-w-4xl mx-auto text-center">
-          <span className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 block mb-4 font-semibold">THE CHRONOLOGY</span>
-          <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-14">
-            Launching <span className="font-serif italic font-light text-zinc-400">Soon</span>
-          </h2>
-          
-          {/* Static countdown format - strictly updates numeric content instantly */}
-          {isMounted ? (
-            <div className="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto">
-              <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
-                <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.days).padStart(2, "0")}</span>
-                <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Days</span>
-              </div>
-              <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
-                <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.hours).padStart(2, "0")}</span>
-                <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Hours</span>
-              </div>
-              <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
-                <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.minutes).padStart(2, "0")}</span>
-                <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Minutes</span>
-              </div>
-              <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
-                <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.seconds).padStart(2, "0")}</span>
-                <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Seconds</span>
-              </div>
-            </div>
-          ) : (
-            <div className="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
-                  <span className="text-3xl md:text-5xl block text-zinc-800 font-light tracking-tight">--</span>
-                  <span className="text-[10px] uppercase tracking-widest text-zinc-600 block mt-3 font-semibold">...</span>
+      {!isExpired && (
+        <section className="border-t border-zinc-900 bg-zinc-950 py-24 px-6 md:px-12 lg:px-24 relative z-10">
+          <div className="max-w-4xl mx-auto text-center">
+            <span className="text-[10px] uppercase tracking-[0.4em] text-zinc-500 block mb-4 font-semibold">THE CHRONOLOGY</span>
+            <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-14">
+              Launching <span className="font-serif italic font-light text-zinc-400">Soon</span>
+            </h2>
+            
+            {/* Static countdown format - strictly updates numeric content instantly */}
+            {isMounted ? (
+              <div className="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto">
+                <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
+                  <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.days).padStart(2, "0")}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Days</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </section>
+                <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
+                  <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.hours).padStart(2, "0")}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Hours</span>
+                </div>
+                <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
+                  <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.minutes).padStart(2, "0")}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Minutes</span>
+                </div>
+                <div className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
+                  <span className="text-3xl md:text-5xl block text-white font-light tracking-tight">{String(timeLeft.seconds).padStart(2, "0")}</span>
+                  <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Seconds</span>
+                </div>
+              </div>
+            ) : (
+              <div className="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto">
+                {[...Array(4)].map((_, i) => (
+                  <div key={i} className="border border-zinc-900 bg-black p-5 md:p-8 rounded-none">
+                    <span className="text-3xl md:text-5xl block text-zinc-800 font-light tracking-tight">--</span>
+                    <span className="text-[10px] uppercase tracking-widest text-zinc-600 block mt-3 font-semibold">...</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
       {/* Founding Members & Registration Form Section */}
       <section id="early-access" className="border-t border-zinc-900 bg-black py-24 px-6 md:px-12 lg:px-24 relative z-10">
@@ -266,9 +286,11 @@ export default function ComingSoon() {
               <h3 className="text-2xl md:text-3xl font-light tracking-tight mb-4">
                 Founding <span className="font-serif italic text-zinc-300">Members</span>
               </h3>
-              <p className="text-zinc-400 text-sm leading-relaxed mb-8 font-light">
-                Join early and become part of the first generation of KASEDA members. Only founding members will receive the secret launch coupon on WhatsApp.
-              </p>
+              <div className="text-zinc-400 text-sm leading-relaxed mb-8 font-light space-y-3">
+                <p>KASEDA officially launches on 20 July 2026.</p>
+                <p>Join the Founding Community before launch day and receive your exclusive launch coupon.</p>
+                <p className="text-white font-medium text-xs uppercase tracking-wide">Early access registration closes when the countdown reaches zero.</p>
+              </div>
             </div>
             
             <div className="border-t border-zinc-900 pt-6">
@@ -287,7 +309,7 @@ export default function ComingSoon() {
               <div className="border border-zinc-850 p-6 bg-zinc-950 text-left rounded-none">
                 <span className="text-white block font-serif italic text-lg mb-2">Welcome to the Founding Community.</span>
                 <p className="text-zinc-400 text-xs leading-relaxed font-light">
-                  Your exclusive KASEDA launch coupon will be delivered directly to your WhatsApp when we officially launch.
+                  Your exclusive KASEDA launch coupon will be delivered to your WhatsApp before our official launch on 20 July 2026.
                 </p>
               </div>
             ) : (
@@ -396,7 +418,7 @@ export default function ComingSoon() {
       </section>
 
       {/* Collection Preview Section */}
-      <section className="border-t border-zinc-900 bg-black py-24 px-6 md:px-12 lg:px-24 relative z-10">
+      <section id="collection-preview" className="border-t border-zinc-900 bg-black py-24 px-6 md:px-12 lg:px-24 relative z-10">
         <div className="max-w-4xl mx-auto">
           <div className="flex flex-col md:flex-row md:items-end justify-between mb-16">
             <div>
