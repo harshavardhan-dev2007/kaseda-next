@@ -26,7 +26,7 @@ export default function ComingSoon() {
 
   useEffect(() => {
     setIsMounted(true);
-    
+
     const calculateTimeLeft = () => {
       const difference = +new Date(LAUNCH_DATE) - +new Date();
       let newTimeLeft = { days: 0, hours: 0, minutes: 0, seconds: 0 };
@@ -116,7 +116,7 @@ export default function ComingSoon() {
 
   return (
     <div className="flex flex-col min-h-screen bg-black text-white relative font-sans selection:bg-white selection:text-black">
-      
+
       {/* Structural Thin Grid Lines — Signature luxury editorial design */}
       <div className="hidden lg:block absolute left-[8%] right-[8%] top-0 bottom-0 border-l border-r border-zinc-900/60 pointer-events-none" />
 
@@ -133,14 +133,14 @@ export default function ComingSoon() {
           />
         </Link>
         <div className="flex items-center gap-8">
-          <button 
-            onClick={() => scrollToSection("story")} 
+          <button
+            onClick={() => scrollToSection("story")}
             className="text-[10px] uppercase tracking-widest text-zinc-400 hover:text-white cursor-pointer select-none font-medium"
           >
             Our Story
           </button>
-          <button 
-            onClick={() => scrollToSection("early-access")} 
+          <button
+            onClick={() => scrollToSection("early-access")}
             className="text-[10px] uppercase tracking-widest bg-white text-black px-5 py-2 font-semibold cursor-pointer select-none hover:bg-zinc-200"
           >
             Get Access
@@ -162,10 +162,7 @@ export default function ComingSoon() {
           />
         </div>
 
-        {/* Small Label */}
-        <span className="text-[11px] uppercase tracking-[0.45em] text-zinc-500 block mb-6 font-semibold">
-          FROM KALAM TO KAPADA
-        </span>
+
 
         {/* Headline — DM Sans with Fraunces Italic Accent */}
         <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight leading-none mb-10">
@@ -223,7 +220,7 @@ export default function ComingSoon() {
               KASEDA was born from a simple idea: expression should not stay locked away on paper. It should be worn out in the world, taking physical form.
             </p>
             <p>
-              Inspired by the creative journey from <strong className="text-white font-medium">Kalam</strong> (the pen that captures raw raw imagination) to <strong className="text-white font-medium">Kapada</strong> (the premium fabric that displays identity), KASEDA transforms raw creativity, confidence, and individuality into everyday streetwear.
+              Inspired by the creative journey from <strong className="text-white font-medium">Kalam</strong> (the pen that captures raw imagination) to <strong className="text-white font-medium">Kapada</strong> (the premium fabric that displays identity), KASEDA transforms raw creativity, confidence, and individuality into everyday streetwear.
             </p>
             <p className="border-l border-zinc-800 pl-6 italic text-zinc-300 font-serif text-lg font-light leading-relaxed">
               Every design decision is built on confidence, simplicity, and premium quality. Every piece is designed to help you wear your story.
@@ -240,7 +237,7 @@ export default function ComingSoon() {
             <h2 className="text-3xl md:text-4xl font-light tracking-tight mb-14">
               Launching <span className="font-serif italic font-light text-zinc-400">Soon</span>
             </h2>
-            
+
             {/* Static countdown format - strictly updates numeric content instantly */}
             {isMounted ? (
               <div className="grid grid-cols-4 gap-3 md:gap-6 max-w-2xl mx-auto">
@@ -278,7 +275,7 @@ export default function ComingSoon() {
       {/* Founding Members & Registration Form Section */}
       <section id="early-access" className="border-t border-zinc-900 bg-black py-24 px-6 md:px-12 lg:px-24 relative z-10">
         <div className="max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-stretch">
-          
+
           {/* Founding Members Card */}
           <div className="border border-zinc-900 bg-zinc-950 p-8 md:p-12 flex flex-col justify-between rounded-none">
             <div>
@@ -292,7 +289,7 @@ export default function ComingSoon() {
                 <p className="text-white font-medium text-xs uppercase tracking-wide">Early access registration closes when the countdown reaches zero.</p>
               </div>
             </div>
-            
+
             <div className="border-t border-zinc-900 pt-6">
               <span className="text-6xl md:text-7xl font-extralight text-white block leading-none">250+</span>
               <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Active Founding Members</span>
@@ -304,7 +301,7 @@ export default function ComingSoon() {
             <h3 className="text-2xl font-light tracking-tight mb-6">
               Request <span className="font-serif italic text-zinc-350">Early Access</span>
             </h3>
-            
+
             {successMsg ? (
               <div className="border border-zinc-850 p-6 bg-zinc-950 text-left rounded-none">
                 <span className="text-white block font-serif italic text-lg mb-2">Welcome to the Founding Community.</span>
@@ -393,7 +390,7 @@ export default function ComingSoon() {
           <h2 className="text-3xl md:text-4xl font-light tracking-tight text-center mb-16">
             Why Join <span className="font-serif italic">Early?</span>
           </h2>
-          
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {[
               { title: "Secret Launch Coupon", desc: "Delivered straight to WhatsApp on launch day." },
@@ -495,10 +492,10 @@ export default function ComingSoon() {
       {/* Footer */}
       <footer className="border-t border-zinc-900 bg-black py-16 px-6 md:px-12 lg:px-24 relative z-10">
         <div className="max-w-4xl mx-auto flex flex-col md:flex-row items-center justify-between gap-12">
-          
+
           {/* Footer Logo */}
           <div className="flex flex-col items-center md:items-start">
-            <Link href="/" className="block select-none mb-2">
+            <Link href="/" className="block select-none">
               <Image
                 src="/kaseda-logo.png"
                 alt="KASEDA Logo"
@@ -507,7 +504,6 @@ export default function ComingSoon() {
                 className="object-contain invert h-[50px] w-auto"
               />
             </Link>
-            <span className="text-[9px] uppercase tracking-[0.4em] text-zinc-500 font-semibold">KALAM SE KAPADA</span>
           </div>
 
           {/* Social / Contact Links */}
