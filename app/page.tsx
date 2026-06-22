@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 // Configurable Launch Date: October 15, 2026, at 12:00 PM IST (GMT+5:30)
 const LAUNCH_DATE_STR = "2026-10-15T12:00:00+05:30";
@@ -117,10 +118,17 @@ export default function ComingSoon() {
 
       {/* Navigation Header */}
       <header className="w-full border-b border-zinc-900 py-6 px-6 md:px-12 lg:px-24 flex items-center justify-between relative z-10 bg-black">
-        <div className="flex items-center gap-2">
-          {/* Logo emblem */}
-          <span className="font-serif italic text-lg tracking-widest font-normal">क से da</span>
-        </div>
+        <Link href="/" className="flex items-center select-none cursor-pointer">
+          <div className="relative h-[28px] w-[56px] md:h-[36px] md:w-[72px]">
+            <Image
+              src="/kaseda-logo.png"
+              alt="KASEDA Logo"
+              fill
+              priority
+              className="object-contain invert"
+            />
+          </div>
+        </Link>
         <div className="flex items-center gap-8">
           <button 
             onClick={() => scrollToSection("story")} 
@@ -141,7 +149,7 @@ export default function ComingSoon() {
       <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28 lg:py-36 relative z-10 max-w-4xl mx-auto w-full">
         {/* Prominently Centered Logo */}
         <div className="mb-14 md:mb-20 flex justify-center w-full">
-          <div className="relative w-[320px] h-[130px] md:w-[500px] md:h-[190px] bg-black">
+          <div className="relative w-[280px] h-[140px] md:w-[480px] md:h-[240px]">
             <Image
               src="/kaseda-logo.png"
               alt="KASEDA — Kalam Se Kapada"
@@ -470,8 +478,15 @@ export default function ComingSoon() {
           
           {/* Footer Logo */}
           <div className="flex flex-col items-center md:items-start">
-            <span className="font-serif italic text-xl tracking-[0.25em] font-normal text-white">क से da</span>
-            <span className="text-[9px] uppercase tracking-[0.4em] text-zinc-500 mt-2 font-semibold">KALAM SE KAPADA</span>
+            <Link href="/" className="relative w-[100px] h-[50px] mb-2 block select-none">
+              <Image
+                src="/kaseda-logo.png"
+                alt="KASEDA Logo"
+                fill
+                className="object-contain invert"
+              />
+            </Link>
+            <span className="text-[9px] uppercase tracking-[0.4em] text-zinc-500 font-semibold">KALAM SE KAPADA</span>
           </div>
 
           {/* Social / Contact Links */}
