@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { motion, useScroll, useTransform } from "framer-motion";
 
 // Configurable Launch Date: July 20, 2026, at 12:00 AM IST (Asia/Kolkata)
 const LAUNCH_DATE = "2026-07-20T00:00:00+05:30";
@@ -23,6 +24,20 @@ export default function ComingSoon() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
+  const [memberCount, setMemberCount] = useState<number | null>(null);
+  const [limit, setLimit] = useState<number>(500);
+
+  // Motion wallpaper state
+  const [parallax, setParallax] = useState({ x: 0, y: 0 });
+  const heroRef = useRef<HTMLDivElement>(null);
+  const targetParallax = useRef({ x: 0, y: 0 });
+  const animFrame = useRef<number>(0);
+
+  // Scroll-based transforms
+  const { scrollY } = useScroll();
+  const bgScale = useTransform(scrollY, [0, 600], [1, 1.05]);
+  const heroY = useTransform(scrollY, [0, 600], [0, -40]);
+  const heroOpacity = useTransform(scrollY, [0, 400], [1, 0.6]);
 
   useEffect(() => {
     setIsMounted(true);
@@ -52,6 +67,85 @@ export default function ComingSoon() {
     }, 1000);
 
     return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    const fetchMemberCount = async () => {
+      try {
+        const res = await fetch("/api/member-count");
+        if (res.ok) {
+          const data = await res.json();
+          setMemberCount(data.count);
+          if (data.limit) setLimit(data.limit);
+        }
+      } catch (err) {
+        console.error("Failed to fetch member count", err);
+      }
+    };
+    fetchMemberCount();
+  }, []);
+
+  // Smooth interpolation loop for parallax
+  const lerp = useCallback((start: number, end: number, factor: number) => {
+    return start + (end - start) * factor;
+  }, []);
+
+  useEffect(() => {
+    let running = true;
+    const animate = () => {
+      if (!running) return;
+      setParallax(prev => ({
+        x: lerp(prev.x, targetParallax.current.x, 0.08),
+        y: lerp(prev.y, targetParallax.current.y, 0.08),
+      }));
+      animFrame.current = requestAnimationFrame(animate);
+    };
+    animFrame.current = requestAnimationFrame(animate);
+    return () => {
+      running = false;
+      cancelAnimationFrame(animFrame.current);
+    };
+  }, [lerp]);
+
+  // Desktop: mouse-based parallax
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      const cx = window.innerWidth / 2;
+      const cy = window.innerHeight / 2;
+      const px = (e.clientX - cx) / cx; // -1 to 1
+      const py = (e.clientY - cy) / cy; // -1 to 1
+      targetParallax.current = { x: px, y: py };
+    };
+
+    // Only attach on non-touch devices
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (!isTouchDevice) {
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  // Mobile: DeviceOrientation-based parallax
+  useEffect(() => {
+    const handleOrientation = (e: DeviceOrientationEvent) => {
+      const gamma = e.gamma || 0; // left-right tilt (-90 to 90)
+      const beta = e.beta || 0;   // front-back tilt (-180 to 180)
+      const px = Math.max(-1, Math.min(1, gamma / 30));
+      const py = Math.max(-1, Math.min(1, (beta - 45) / 30));
+      targetParallax.current = { x: px, y: py };
+    };
+
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    if (isTouchDevice && typeof DeviceOrientationEvent !== 'undefined') {
+      window.addEventListener('deviceorientation', handleOrientation, { passive: true });
+    }
+
+    return () => {
+      window.removeEventListener('deviceorientation', handleOrientation);
+    };
   }, []);
 
   const scrollToSection = (id: string) => {
@@ -111,6 +205,13 @@ export default function ComingSoon() {
       setErrorMsg(err.message || "Failed to register. Please try again.");
     } finally {
       setIsSubmitting(false);
+      // Fetch fresh member count after registration
+      fetch("/api/member-count")
+        .then(res => res.json())
+        .then(data => {
+          if (data.count !== undefined) setMemberCount(data.count);
+        })
+        .catch(() => {});
     }
   };
 
@@ -118,10 +219,10 @@ export default function ComingSoon() {
     <div className="flex flex-col min-h-screen bg-black text-white relative font-sans selection:bg-white selection:text-black">
 
       {/* Structural Thin Grid Lines — Signature luxury editorial design */}
-      <div className="hidden lg:block absolute left-[8%] right-[8%] top-0 bottom-0 border-l border-r border-zinc-900/60 pointer-events-none" />
+      <div className="hidden lg:block absolute left-[8%] right-[8%] top-0 bottom-0 border-l border-r border-zinc-900/60 pointer-events-none z-[1]" />
 
       {/* Navigation Header */}
-      <header className="w-full border-b border-zinc-900 py-6 px-6 md:px-12 lg:px-24 flex items-center justify-between relative z-10 bg-black">
+      <header className="w-full border-b border-zinc-900/80 py-6 px-6 md:px-12 lg:px-24 flex items-center justify-between relative z-20 bg-black/70 backdrop-blur-md">
         <Link href="/" className="flex items-center select-none cursor-pointer">
           <Image
             src="/kaseda-logo.png"
@@ -148,63 +249,123 @@ export default function ComingSoon() {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28 lg:py-36 relative z-10 max-w-4xl mx-auto w-full">
-        {/* Prominently Centered Logo */}
-        <div className="mb-14 md:mb-20 flex justify-center w-full">
+      {/* Hero Section with Motion Wallpaper */}
+      <div ref={heroRef} className="relative w-full min-h-screen overflow-hidden">
+
+        {/* DROP001 Motion Wallpaper Background */}
+        <motion.div
+          className="absolute inset-0 z-0"
+          style={{
+            scale: bgScale,
+            x: parallax.x * -4,
+            y: parallax.y * -4,
+          }}
+        >
           <Image
-            src="/kaseda-logo.png"
-            alt="KASEDA — Kalam Se Kapada"
-            width={480}
-            height={240}
+            src="/drop001-wallpaper.png"
+            alt=""
+            fill
             priority
-            className="object-contain invert w-[280px] h-[140px] md:w-[480px] md:h-[240px]"
+            sizes="100vw"
+            className="object-cover"
+            style={{ objectPosition: 'center' }}
           />
-        </div>
+          {/* Dark overlay for readability */}
+          <div className="absolute inset-0 bg-black/60" />
+        </motion.div>
 
+        {/* Hero Content — floats above wallpaper */}
+        <motion.main
+          className="flex-1 flex flex-col items-center justify-center text-center px-6 py-20 md:py-28 lg:py-36 relative z-10 max-w-4xl mx-auto w-full min-h-screen"
+          style={{
+            y: heroY,
+            opacity: heroOpacity,
+          }}
+        >
+          {/* Prominently Centered Logo — deepest parallax layer */}
+          <motion.div
+            className="mb-14 md:mb-20 flex justify-center w-full"
+            style={{
+              x: parallax.x * 9,
+              y: parallax.y * 9,
+            }}
+          >
+            <Image
+              src="/kaseda-logo.png"
+              alt="KASEDA — Kalam Se Kapada"
+              width={480}
+              height={240}
+              priority
+              className="object-contain invert w-[280px] h-[140px] md:w-[480px] md:h-[240px]"
+            />
+          </motion.div>
 
+          {/* Headline — DM Sans with Fraunces Italic Accent */}
+          <motion.h1
+            className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight leading-none mb-10"
+            style={{
+              x: parallax.x * 11,
+              y: parallax.y * 11,
+            }}
+          >
+            Wear <span className="font-serif italic font-light text-zinc-200">Confidence</span>.<br />
+            Wear <span className="font-serif italic font-normal text-white">KASEDA</span>.
+          </motion.h1>
 
-        {/* Headline — DM Sans with Fraunces Italic Accent */}
-        <h1 className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight leading-none mb-10">
-          Wear <span className="font-serif italic font-light text-zinc-200">Confidence</span>.<br />
-          Wear <span className="font-serif italic font-normal text-white">KASEDA</span>.
-        </h1>
+          {/* Supporting Text */}
+          <motion.p
+            className="text-zinc-400 text-sm md:text-base max-w-lg mx-auto leading-relaxed mb-14 font-light"
+            style={{
+              x: parallax.x * 11,
+              y: parallax.y * 11,
+            }}
+          >
+            Premium streetwear and everyday essentials designed for those who believe fashion is a form of self-expression.
+          </motion.p>
 
-        {/* Supporting Text */}
-        <p className="text-zinc-400 text-sm md:text-base max-w-lg mx-auto leading-relaxed mb-14 font-light">
-          Premium streetwear and everyday essentials designed for those who believe fashion is a form of self-expression.
-        </p>
-
-        {/* CTA Actions */}
-        {isExpired ? (
-          <div className="flex flex-col items-center gap-6">
-            <span className="text-zinc-350 font-serif italic text-xl tracking-widest block font-light">
-              KASEDA Has Officially Launched
-            </span>
-            <button
-              onClick={() => scrollToSection("collection-preview")}
-              className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
+          {/* CTA Actions */}
+          {isExpired ? (
+            <motion.div
+              className="flex flex-col items-center gap-6"
+              style={{
+                x: parallax.x * 11,
+                y: parallax.y * 11,
+              }}
             >
-              Explore The Collection
-            </button>
-          </div>
-        ) : (
-          <div className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md mx-auto">
-            <button
-              onClick={() => scrollToSection("early-access")}
-              className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
+              <span className="text-zinc-350 font-serif italic text-xl tracking-widest block font-light">
+                KASEDA Has Officially Launched
+              </span>
+              <button
+                onClick={() => scrollToSection("collection-preview")}
+                className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
+              >
+                Explore The Collection
+              </button>
+            </motion.div>
+          ) : (
+            <motion.div
+              className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md mx-auto"
+              style={{
+                x: parallax.x * 11,
+                y: parallax.y * 11,
+              }}
             >
-              Join The Founding Community
-            </button>
-            <button
-              onClick={() => scrollToSection("story")}
-              className="bg-black text-white uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-zinc-800 hover:border-white cursor-pointer select-none rounded-none"
-            >
-              Learn Our Story
-            </button>
-          </div>
-        )}
-      </main>
+              <button
+                onClick={() => scrollToSection("early-access")}
+                className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
+              >
+                {memberCount !== null && memberCount >= limit ? "Join The Waitlist" : "Join The Founding Community"}
+              </button>
+              <button
+                onClick={() => scrollToSection("story")}
+                className="bg-black/70 backdrop-blur-sm text-white uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-zinc-700 hover:border-white cursor-pointer select-none rounded-none"
+              >
+                Learn Our Story
+              </button>
+            </motion.div>
+          )}
+        </motion.main>
+      </div>
 
       {/* Brand Story Section */}
       <section id="story" className="border-t border-zinc-900 bg-black py-24 px-6 md:px-12 lg:px-24 relative z-10">
@@ -279,30 +440,68 @@ export default function ComingSoon() {
           {/* Founding Members Card */}
           <div className="border border-zinc-900 bg-zinc-950 p-8 md:p-12 flex flex-col justify-between rounded-none">
             <div>
-              <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 block mb-6 font-semibold">FOUNDING BENCHMARK</span>
+              <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 block mb-6 font-semibold">THE FOUNDING COMMUNITY</span>
               <h3 className="text-2xl md:text-3xl font-light tracking-tight mb-4">
                 Founding <span className="font-serif italic text-zinc-300">Members</span>
               </h3>
               <div className="text-zinc-400 text-sm leading-relaxed mb-8 font-light space-y-3">
-                <p>KASEDA officially launches on 20 July 2026.</p>
-                <p>Join the Founding Community before launch day and receive your exclusive launch coupon.</p>
-                <p className="text-white font-medium text-xs uppercase tracking-wide">Early access registration closes when the countdown reaches zero.</p>
+                <p className="uppercase tracking-wider text-[11px] text-white">Only the first {limit} members receive:</p>
+                <ul className="space-y-2 list-none pl-0">
+                  <li>• Secret Launch Coupon</li>
+                  <li>• Early Access To Collections</li>
+                  <li>• Exclusive Product Drops</li>
+                </ul>
               </div>
             </div>
 
-            <div className="border-t border-zinc-900 pt-6">
-              <span className="text-6xl md:text-7xl font-extralight text-white block leading-none">250+</span>
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500 block mt-3 font-semibold">Active Founding Members</span>
+            <div className="border-t border-zinc-900 pt-8">
+              <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 block mb-4 font-semibold">FOUNDING MEMBER SPOTS CLAIMED</span>
+              <div className="mb-6 flex items-baseline">
+                <span className="text-5xl md:text-6xl font-extralight text-white leading-none tracking-tight">
+                  {memberCount === null ? "--" : memberCount}
+                </span>
+                <span className="text-2xl md:text-3xl font-light text-zinc-600 ml-2">/ {limit}</span>
+              </div>
+              
+              <div className="h-[2px] w-full bg-zinc-900 mb-4 relative">
+                <div 
+                  className="h-full bg-zinc-200 absolute top-0 left-0 transition-all duration-1000 ease-out"
+                  style={{ width: `${memberCount === null ? 0 : Math.min(100, (memberCount / limit) * 100)}%` }}
+                />
+              </div>
+              
+              <span className="text-[10px] uppercase tracking-widest text-zinc-400 block mt-4 font-medium">
+                {memberCount === null ? "..." : Math.max(0, limit - memberCount)} Spots Remaining
+              </span>
             </div>
           </div>
 
           {/* Registration Form */}
           <div className="border border-zinc-900 p-8 md:p-12 flex flex-col justify-center rounded-none bg-black">
-            <h3 className="text-2xl font-light tracking-tight mb-6">
-              Request <span className="font-serif italic text-zinc-350">Early Access</span>
-            </h3>
+            {memberCount !== null && memberCount >= limit ? (
+              <div className="text-center md:text-left">
+                <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 block mb-6 font-semibold">FOUNDING MEMBER REGISTRATION CLOSED</span>
+                <h3 className="text-2xl font-light tracking-tight mb-6">
+                  Founding Member <span className="font-serif italic text-zinc-350">Capacity Reached</span>
+                </h3>
+                <p className="text-zinc-400 text-sm leading-relaxed font-light mb-8">
+                  The first {limit} founding members have secured their place in the KASEDA launch community.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => window.location.href = "mailto:hello@kaseda.co?subject=KASEDA Waitlist"}
+                  className="w-full bg-white text-black uppercase tracking-widest text-xs font-bold py-4 hover:bg-zinc-200 cursor-pointer border border-white hover:border-zinc-200 rounded-none"
+                >
+                  Join The Waitlist
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-2xl font-light tracking-tight mb-6">
+                  Request <span className="font-serif italic text-zinc-350">Early Access</span>
+                </h3>
 
-            {successMsg ? (
+                {successMsg ? (
               <div className="border border-zinc-850 p-6 bg-zinc-950 text-left rounded-none">
                 <span className="text-white block font-serif italic text-lg mb-2">Welcome to the Founding Community.</span>
                 <p className="text-zinc-400 text-xs leading-relaxed font-light">
@@ -378,6 +577,8 @@ export default function ComingSoon() {
                 </span>
               </form>
             )}
+            </>
+            )}
           </div>
 
         </div>
@@ -434,7 +635,7 @@ export default function ComingSoon() {
               {
                 id: 1,
                 name: "OVERSIZED STREETWEAR",
-                image: "/oversized_streetwear.png",
+                image: "/oversized_streetwear_male.png",
                 desc: "Boxy cuts and heavyweight cottons designed to hold structural posture."
               },
               {
