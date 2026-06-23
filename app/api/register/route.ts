@@ -63,22 +63,73 @@ export async function POST(req: NextRequest) {
     const privateKey = process.env.GOOGLE_PRIVATE_KEY;
     const sheetId = process.env.GOOGLE_SHEET_ID;
     const sheetRange = process.env.GOOGLE_SHEET_RANGE || "Sheet1!A:E";
+    const hasSheetsCreds = Boolean(clientEmail && privateKey && sheetId);
 
-    const hasSheetsCreds = clientEmail && privateKey && sheetId;
+    let sheetsAuth: any = null;
+    let sheetsClient: any = null;
 
     if (hasSheetsCreds) {
-      console.log("Saving registration to Google Sheets...");
-      // Initialize Google Auth using JWT options object (TypeScript compatible)
-      const auth = new google.auth.JWT({
+      sheetsAuth = new google.auth.JWT({
         email: clientEmail,
-        key: privateKey.replace(/\\n/g, "\n"),
+        key: privateKey!.replace(/\\n/g, "\n"),
         scopes: ["https://www.googleapis.com/auth/spreadsheets"],
       });
+      sheetsClient = google.sheets({ version: "v4", auth: sheetsAuth });
+    }
 
-      const sheets = google.sheets({ version: "v4", auth });
+    // Helper function to check duplicates
+    async function isDuplicateRegistration(checkEmail: string, checkPhone: string): Promise<boolean> {
+      const normalizedEmail = checkEmail.trim().toLowerCase();
+      const normalizedPhone = checkPhone.replace(/\s+/g, "");
+
+      if (hasSheetsCreds && sheetsClient && sheetId) {
+        try {
+          const response = await sheetsClient.spreadsheets.values.get({
+            spreadsheetId: sheetId,
+            range: sheetRange,
+          });
+          const rows = response.data.values;
+          if (rows && rows.length > 1) {
+            for (const row of rows.slice(1)) {
+              const rowPhone = (row[1] || "").replace(/\s+/g, "");
+              const rowEmail = (row[2] || "").trim().toLowerCase();
+              if (rowPhone === normalizedPhone || rowEmail === normalizedEmail) return true;
+            }
+          }
+        } catch (e) {
+          console.error("Error reading sheets for duplicate check", e);
+        }
+      } else {
+        const mockFilePath = path.join(process.cwd(), "public", "registrations-mock.json");
+        try {
+          const fileContent = await fs.readFile(mockFilePath, "utf8");
+          const registrations = JSON.parse(fileContent);
+          for (const reg of registrations) {
+            const rowPhone = (reg.whatsappNumber || "").replace(/\s+/g, "");
+            const rowEmail = (reg.email || "").trim().toLowerCase();
+            if (rowPhone === normalizedPhone || rowEmail === normalizedEmail) return true;
+          }
+        } catch (e) {
+          // File doesn't exist yet
+        }
+      }
+      return false;
+    }
+
+    // 4. Check for duplicates
+    const isDuplicate = await isDuplicateRegistration(email, whatsappNumber);
+    if (isDuplicate) {
+      return NextResponse.json(
+        { success: false, error: "You are already part of the Founding Community." },
+        { status: 409 }
+      );
+    }
+
+    if (hasSheetsCreds && sheetsClient && sheetId) {
+      console.log("Saving registration to Google Sheets...");
 
       // Append registration row
-      await sheets.spreadsheets.values.append({
+      await sheetsClient.spreadsheets.values.append({
         spreadsheetId: sheetId,
         range: sheetRange,
         valueInputOption: "USER_ENTERED",

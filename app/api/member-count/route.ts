@@ -30,9 +30,22 @@ export async function GET() {
       });
 
       const rows = response.data.values;
-      // Assuming row 1 is the header, count rows - 1. If 0 rows, count is 0.
       if (rows && rows.length > 1) {
-        count = rows.length - 1;
+        const seenEmails = new Set<string>();
+        const seenWhatsapps = new Set<string>();
+        let uniqueCount = 0;
+
+        for (const row of rows.slice(1)) {
+          const rowPhone = (row[1] || "").replace(/\s+/g, "");
+          const rowEmail = (row[2] || "").trim().toLowerCase();
+
+          if (!seenEmails.has(rowEmail) && !seenWhatsapps.has(rowPhone)) {
+            uniqueCount++;
+          }
+          if (rowEmail) seenEmails.add(rowEmail);
+          if (rowPhone) seenWhatsapps.add(rowPhone);
+        }
+        count = uniqueCount;
       } else {
         count = 0;
       }
@@ -42,7 +55,26 @@ export async function GET() {
       try {
         const fileContent = await fs.readFile(mockFilePath, "utf8");
         const registrations = JSON.parse(fileContent);
-        count = Array.isArray(registrations) ? registrations.length : 0;
+
+        if (Array.isArray(registrations)) {
+          const seenEmails = new Set<string>();
+          const seenWhatsapps = new Set<string>();
+          let uniqueCount = 0;
+
+          for (const reg of registrations) {
+            const rowPhone = (reg.whatsappNumber || "").replace(/\s+/g, "");
+            const rowEmail = (reg.email || "").trim().toLowerCase();
+
+            if (!seenEmails.has(rowEmail) && !seenWhatsapps.has(rowPhone)) {
+              uniqueCount++;
+            }
+            if (rowEmail) seenEmails.add(rowEmail);
+            if (rowPhone) seenWhatsapps.add(rowPhone);
+          }
+          count = uniqueCount;
+        } else {
+          count = 0;
+        }
       } catch (e) {
         count = 0; // File doesn't exist or is invalid
       }

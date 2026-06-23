@@ -3,12 +3,15 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { motion, useScroll, useTransform } from "framer-motion";
+
 
 // Configurable Launch Date: July 20, 2026, at 12:00 AM IST (Asia/Kolkata)
 const LAUNCH_DATE = "2026-07-20T00:00:00+05:30";
 
 export default function ComingSoon() {
+  const router = useRouter();
   const [isMounted, setIsMounted] = useState(false);
   const [isExpired, setIsExpired] = useState(false);
   const [timeLeft, setTimeLeft] = useState({
@@ -195,9 +198,8 @@ export default function ComingSoon() {
         throw new Error(data.error || "Failed to submit. Please try again.");
       }
 
-      setSuccessMsg(
-        "Welcome to the Founding Community. Your exclusive KASEDA launch coupon will be delivered to your WhatsApp before our official launch on 20 July 2026."
-      );
+      // Redirect user to the success page upon saving successfully
+      router.push("/success");
       setFullName("");
       setWhatsappNumber("");
       setEmail("");
@@ -225,10 +227,10 @@ export default function ComingSoon() {
       <header className="w-full border-b border-zinc-900/80 py-6 px-6 md:px-12 lg:px-24 flex items-center justify-between relative z-20 bg-black/70 backdrop-blur-md">
         <Link href="/" className="flex items-center select-none cursor-pointer">
           <Image
-            src="/kaseda-logo.png"
+            src="/kaseda-logo.svg"
             alt="KASEDA Logo"
-            width={72}
-            height={36}
+            width={120}
+            height={60}
             priority
             className="object-contain invert h-[28px] w-auto md:h-[36px]"
           />
@@ -252,27 +254,34 @@ export default function ComingSoon() {
       {/* Hero Section with Motion Wallpaper */}
       <div ref={heroRef} className="relative w-full min-h-screen overflow-hidden">
 
-        {/* DROP001 Motion Wallpaper Background */}
+        {/* LAYER 2 — Classical Artwork Figure (8px range, ambient visual) */}
         <motion.div
-          className="absolute inset-0 z-0"
+          className="absolute inset-0 z-[1] pointer-events-none"
           style={{
-            scale: bgScale,
-            x: parallax.x * -4,
-            y: parallax.y * -4,
+            x: parallax.x * 8,
+            y: parallax.y * 8,
           }}
         >
-          <Image
-            src="/drop001-wallpaper.png"
-            alt=""
-            fill
-            priority
-            sizes="100vw"
-            className="object-cover"
-            style={{ objectPosition: 'center' }}
-          />
-          {/* Dark overlay for readability */}
-          <div className="absolute inset-0 bg-black/60" />
+          <div
+            className="absolute w-[160%] h-[140%] -left-[20%] -top-[15%] md:w-[90%] md:h-[115%] md:left-[5%] md:-top-[10%]"
+            style={{
+              opacity: 0.85,
+            }}
+          >
+            <Image
+              src="/classical-artwork-v2.png"
+              alt=""
+              fill
+              sizes="100vw"
+              className="object-contain"
+              style={{ objectPosition: 'center top' }}
+              priority
+            />
+          </div>
         </motion.div>
+
+        {/* LAYER 3 — Dark gradient overlay for readability */}
+        <div className="absolute inset-0 z-[2] pointer-events-none bg-gradient-to-b from-black/25 via-black/40 to-black/80" />
 
         {/* Hero Content — floats above wallpaper */}
         <motion.main
@@ -282,30 +291,31 @@ export default function ComingSoon() {
             opacity: heroOpacity,
           }}
         >
-          {/* Prominently Centered Logo — deepest parallax layer */}
+          {/* LAYER 4 — Logo (12px range) */}
+          {/* LAYER 4 — Premium Signature Logo (12px range) */}
           <motion.div
-            className="mb-14 md:mb-20 flex justify-center w-full"
+            className="mb-16 md:mb-20 flex justify-center w-full"
             style={{
-              x: parallax.x * 9,
-              y: parallax.y * 9,
+              x: parallax.x * 12,
+              y: parallax.y * 12,
             }}
           >
             <Image
-              src="/kaseda-logo.png"
-              alt="KASEDA — Kalam Se Kapada"
-              width={480}
-              height={240}
+              src="/kaseda-logo.svg"
+              alt="KASEDA Logo"
+              width={380}
+              height={190}
               priority
-              className="object-contain invert w-[280px] h-[140px] md:w-[480px] md:h-[240px]"
+              className="object-contain invert w-[240px] h-[120px] md:w-[380px] md:h-[190px]"
             />
           </motion.div>
 
-          {/* Headline — DM Sans with Fraunces Italic Accent */}
+          {/* LAYER 5 — Headline (15px range) */}
           <motion.h1
-            className="text-5xl md:text-7xl lg:text-8xl font-light tracking-tight leading-none mb-10"
+            className="text-4xl md:text-6xl lg:text-7xl font-extralight tracking-tight leading-[0.85] mb-14"
             style={{
-              x: parallax.x * 11,
-              y: parallax.y * 11,
+              x: parallax.x * 15,
+              y: parallax.y * 15,
             }}
           >
             Wear <span className="font-serif italic font-light text-zinc-200">Confidence</span>.<br />
@@ -316,8 +326,8 @@ export default function ComingSoon() {
           <motion.p
             className="text-zinc-400 text-sm md:text-base max-w-lg mx-auto leading-relaxed mb-14 font-light"
             style={{
-              x: parallax.x * 11,
-              y: parallax.y * 11,
+              x: parallax.x * 15,
+              y: parallax.y * 15,
             }}
           >
             Premium streetwear and everyday essentials designed for those who believe fashion is a form of self-expression.
@@ -328,8 +338,8 @@ export default function ComingSoon() {
             <motion.div
               className="flex flex-col items-center gap-6"
               style={{
-                x: parallax.x * 11,
-                y: parallax.y * 11,
+                x: parallax.x * 15,
+                y: parallax.y * 15,
               }}
             >
               <span className="text-zinc-350 font-serif italic text-xl tracking-widest block font-light">
@@ -344,27 +354,34 @@ export default function ComingSoon() {
             </motion.div>
           ) : (
             <motion.div
-              className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-md mx-auto"
+              className="flex flex-col gap-4 w-full max-w-sm mx-auto"
               style={{
-                x: parallax.x * 11,
-                y: parallax.y * 11,
+                x: parallax.x * 15,
+                y: parallax.y * 15,
               }}
             >
               <button
                 onClick={() => scrollToSection("early-access")}
-                className="bg-white text-black uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-white hover:bg-black hover:text-white cursor-pointer select-none rounded-none"
+                className="w-full bg-transparent text-white uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-zinc-600 hover:bg-white hover:text-black cursor-pointer select-none rounded-none flex items-center justify-center gap-3"
               >
                 {memberCount !== null && memberCount >= limit ? "Join The Waitlist" : "Join The Founding Community"}
+                <span>→</span>
               </button>
               <button
                 onClick={() => scrollToSection("story")}
-                className="bg-black/70 backdrop-blur-sm text-white uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-zinc-700 hover:border-white cursor-pointer select-none rounded-none"
+                className="w-full bg-transparent text-white uppercase tracking-widest text-[11px] font-bold py-4 px-8 border border-zinc-600 hover:bg-white hover:text-black cursor-pointer select-none rounded-none"
               >
                 Learn Our Story
               </button>
             </motion.div>
           )}
         </motion.main>
+
+        {/* Scroll Indicator */}
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10">
+          <span className="text-zinc-500 text-xl font-light">↓</span>
+          <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 font-semibold">Scroll</span>
+        </div>
       </div>
 
       {/* Brand Story Section */}
@@ -482,7 +499,7 @@ export default function ComingSoon() {
               <div className="text-center md:text-left">
                 <span className="text-[10px] uppercase tracking-[0.3em] text-zinc-500 block mb-6 font-semibold">FOUNDING MEMBER REGISTRATION CLOSED</span>
                 <h3 className="text-2xl font-light tracking-tight mb-6">
-                  Founding Member <span className="font-serif italic text-zinc-350">Capacity Reached</span>
+                  Founding Membership <span className="font-serif italic text-zinc-350">Full</span>
                 </h3>
                 <p className="text-zinc-400 text-sm leading-relaxed font-light mb-8">
                   The first {limit} founding members have secured their place in the KASEDA launch community.
@@ -698,10 +715,10 @@ export default function ComingSoon() {
           <div className="flex flex-col items-center md:items-start">
             <Link href="/" className="block select-none">
               <Image
-                src="/kaseda-logo.png"
+                src="/kaseda-logo.svg"
                 alt="KASEDA Logo"
-                width={100}
-                height={50}
+                width={120}
+                height={60}
                 className="object-contain invert h-[50px] w-auto"
               />
             </Link>
