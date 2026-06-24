@@ -506,7 +506,7 @@ export default function ComingSoon() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => window.location.href = "mailto:hello@kaseda.co?subject=KASEDA Waitlist"}
+                  onClick={() => window.location.href = "mailto:Kaseda2026@gmail.com?subject=KASEDA Waitlist"}
                   className="w-full bg-white text-black uppercase tracking-widest text-xs font-bold py-4 hover:bg-zinc-200 cursor-pointer border border-white hover:border-zinc-200 rounded-none"
                 >
                   Join The Waitlist
@@ -570,7 +570,7 @@ export default function ComingSoon() {
                     onChange={(e) => setEmail(e.target.value)}
                     required
                     disabled={isSubmitting}
-                    placeholder="e.g. hello@kaseda.co"
+                    placeholder="e.g. Kaseda2026@gmail.com"
                     className="w-full bg-zinc-950 border border-zinc-900 px-4 py-3 text-sm focus:border-white focus:outline-none placeholder-zinc-700 text-white rounded-none"
                   />
                 </div>
@@ -729,14 +729,14 @@ export default function ComingSoon() {
             <div>
               <span className="text-[10px] uppercase tracking-widest text-zinc-650 block mb-2 font-semibold">Connect</span>
               <div className="space-y-1">
-                <a href="#" className="text-xs text-zinc-400 hover:text-white block font-light">Instagram</a>
-                <a href="#" className="text-xs text-zinc-400 hover:text-white block font-light">WhatsApp Business</a>
+                <a href="https://www.instagram.com/kaseda.in?igsh=MWFzZWVibWsxN2Fz" target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-400 hover:text-white block font-light">Instagram</a>
+                <a href="https://wa.me/917680956376" target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-400 hover:text-white block font-light">WhatsApp Business</a>
               </div>
             </div>
 
             <div>
               <span className="text-[10px] uppercase tracking-widest text-zinc-650 block mb-2 font-semibold">Inquiries</span>
-              <a href="mailto:hello@kaseda.co" className="text-xs text-zinc-400 hover:text-white block font-light">hello@kaseda.co</a>
+              <a href="mailto:Kaseda2026@gmail.com" className="text-xs text-zinc-400 hover:text-white block font-light">Kaseda2026@gmail.com</a>
             </div>
           </div>
 
