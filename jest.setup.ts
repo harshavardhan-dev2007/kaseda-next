@@ -22,6 +22,35 @@ jest.mock('next/navigation', () => ({
   },
 }));
 
+// Mock next/router (for Pages router compatibility if ever needed)
+jest.mock('next/router', () => ({
+  useRouter() {
+    return {
+      route: '/',
+      pathname: '',
+      query: '',
+      asPath: '',
+      push: jest.fn(),
+      replace: jest.fn(),
+      reload: jest.fn(),
+      back: jest.fn(),
+      prefetch: jest.fn(),
+      beforePopState: jest.fn(),
+      events: {
+        on: jest.fn(),
+        off: jest.fn(),
+        emit: jest.fn(),
+      },
+      isFallback: false,
+    };
+  },
+}));
+
+// Mock window.scrollTo
+if (typeof window !== 'undefined') {
+  Object.defineProperty(window, 'scrollTo', { value: jest.fn(), writable: true });
+}
+
 // Mock framer-motion to skip animations in tests
 jest.mock('framer-motion', () => {
   const actual = jest.requireActual('framer-motion');
